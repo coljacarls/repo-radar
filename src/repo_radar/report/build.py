@@ -11,6 +11,7 @@ ASSETS = Path(__file__).parent
 SCRIPTS = [
     "vendor/d3.v7.min.js",
     "app.js",
+    "prompt.js",
     "views/overview.js",
     "views/hotspots.js",
     "views/deps.js",

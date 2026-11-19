@@ -118,6 +118,21 @@ def test_typescript_lcom4(repo):
     assert any("count" in g and "add()" in g for g in store["groups"])
 
 
+def test_grade_findings_carry_fields_for_agent_prompt(repo):
+    """Der KI-Prompt im Report baut auf diesen Feldern der Top-Befunde auf (report/prompt.js)."""
+    repo.commit(TS_FILES)
+    repo.commit({"apps/web/src/cyc/x.ts": "import { y } from './y';\nexport const x = () => y() + 1;\n"}, author=("Alan", "alan@example.com"))
+    grades = {g["key"]: g for g in analyze(repo)["grades"]}
+    fn = grades["complexity"]["top"][0]
+    assert fn["line"] <= fn["end"] and fn["nloc"] > 0
+    assert grades["unit_size"]["top"][0]["ccn"] >= 1
+    assert {"ca", "ce"} <= set(grades["coupling"]["top"][0])
+    assert grades["cycles"]["top"][0]["cycle"] == 0
+    solo = grades["knowledge"]["top"]
+    assert solo and all(t["share"] >= 0.9 for t in solo)
+    assert "apps/web/src/cyc/x.ts" not in {t["file"] for t in solo}  # zwei Autoren je ein Commit
+
+
 def test_test_files_are_flagged_and_excluded_from_metrics(repo):
     repo.commit(TS_FILES)
     data = analyze(repo)

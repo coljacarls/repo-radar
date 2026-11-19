@@ -72,7 +72,10 @@ def compute(files: list[dict], ctx: dict, cfg: dict) -> list[dict]:
                     ["sehr hoch", f"{_fmt(shares[2])} %"],
                 ],
                 "thresholds": g["complexity"]["profile"],
-                "top": [{"file": p, "line": fn["line"], "label": fn["name"], "value": fn["ccn"]} for p, fn in worst],
+                "top": [
+                    {"file": p, "line": fn["line"], "end": fn["end"], "label": fn["name"], "value": fn["ccn"], "nloc": fn["nloc"]}
+                    for p, fn in worst
+                ],
             }
         )
     else:
@@ -100,7 +103,10 @@ def compute(files: list[dict], ctx: dict, cfg: dict) -> list[dict]:
                     ["sehr hoch", f"{_fmt(shares[2])} %"],
                 ],
                 "thresholds": g["unit_size"]["profile"],
-                "top": [{"file": p, "line": fn["line"], "label": fn["name"], "value": fn["nloc"]} for p, fn in worst],
+                "top": [
+                    {"file": p, "line": fn["line"], "end": fn["end"], "label": fn["name"], "value": fn["nloc"], "ccn": fn["ccn"]}
+                    for p, fn in worst
+                ],
             }
         )
     else:
@@ -126,7 +132,16 @@ def compute(files: list[dict], ctx: dict, cfg: dict) -> list[dict]:
                 "details": [["Klonpaare", str(len(dup.clones))], ["duplizierte Zeilen", str(dl)]],
                 "thresholds": g["duplication"]["ladder"],
                 "top": [
-                    {"file": c["a"], "line": c["a_start"], "label": f"↔ {c['b']}:{c['b_start']}", "value": c["lines"]}
+                    {
+                        "file": c["a"],
+                        "line": c["a_start"],
+                        "end": c["a_end"],
+                        "label": f"↔ {c['b']}:{c['b_start']}",
+                        "value": c["lines"],
+                        "other": c["b"],
+                        "other_line": c["b_start"],
+                        "other_end": c["b_end"],
+                    }
                     for c in dup.clones[:15]
                 ],
             }
@@ -160,7 +175,10 @@ def compute(files: list[dict], ctx: dict, cfg: dict) -> list[dict]:
                     ["max. Fan-out", str(max(f["ce"] for f in covered))],
                 ],
                 "thresholds": g["coupling"]["ladder"],
-                "top": [{"file": f["path"], "label": "transitiv abhängige Dateien", "value": f["impact"]} for f in top],
+                "top": [
+                    {"file": f["path"], "label": "transitiv abhängige Dateien", "value": f["impact"], "ca": f["ca"], "ce": f["ce"]}
+                    for f in top
+                ],
             }
         )
     else:
@@ -221,7 +239,14 @@ def compute(files: list[dict], ctx: dict, cfg: dict) -> list[dict]:
                 "details": [["Klassen", str(len(classes))], ["mit LCOM4 > 1", str(len(bad))]],
                 "thresholds": g["cohesion"]["ladder"],
                 "top": [
-                    {"file": p, "line": c["line"], "label": c["name"], "value": c["lcom"]}
+                    {
+                        "file": p,
+                        "line": c["line"],
+                        "label": c["name"],
+                        "value": c["lcom"],
+                        "groups": c["groups"],
+                        "isolated": c.get("isolated", []),
+                    }
                     for p, c in sorted(bad, key=lambda x: -x[1]["lcom"])[:15]
                 ],
             }
@@ -261,7 +286,14 @@ def compute(files: list[dict], ctx: dict, cfg: dict) -> list[dict]:
                 ],
                 "thresholds": g["change_coupling"]["ladder"],
                 "top": [
-                    {"file": c["a"], "label": f"↔ {c['b']}", "value": f"{round(c['degree'] * 100)} % · {c['shared']}×"}
+                    {
+                        "file": c["a"],
+                        "label": f"↔ {c['b']}",
+                        "value": f"{round(c['degree'] * 100)} % · {c['shared']}×",
+                        "other": c["b"],
+                        "degree": c["degree"],
+                        "shared": c["shared"],
+                    }
                     for c in hidden[:15]
                 ],
             }
@@ -302,7 +334,18 @@ def compute(files: list[dict], ctx: dict, cfg: dict) -> list[dict]:
                     ["Schlüsselpersonen", ", ".join(tf_authors) or "–"],
                 ],
                 "thresholds": None,
-                "top": [],
+                # Wissensinseln: Dateien fast nur einer Person, die am häufigsten geändert werden, zuerst
+                "top": [
+                    {
+                        "file": f["path"],
+                        "label": f"{round(f['main_share'] * 100)} % eines Autors",
+                        "value": f"{f['commits_all']} Commits",
+                        "share": f["main_share"],
+                        "commits": f["commits_all"],
+                        "nloc": f["nloc"],
+                    }
+                    for f in sorted(solo, key=lambda f: (-f["commits_all"], -f["nloc"]))[:15]
+                ],
             }
         )
     return out

@@ -108,7 +108,7 @@ keine Abhängigkeit beim Laden.
 
 | Ansicht | Inhalt |
 | --- | --- |
-| Überblick | Notenkarten mit Herleitung und größten Beiträgen, Kennzahlen, Commit-Aktivität, Top-Hotspots, versteckte Kopplung, Zyklen, Sprachen, externe Pakete, Hinweise zur Messung |
+| Überblick | Notenkarten mit Herleitung, größten Beiträgen und KI-Prompt, Kennzahlen, Commit-Aktivität, Top-Hotspots, versteckte Kopplung, Zyklen, Sprachen, externe Pakete, Hinweise zur Messung |
 | Hotspot-Karte | Treemap über die Verzeichnisstruktur, Fläche und Farbe wählbar (Hotspot, Komplexität, Churn, Alter, Hauptautor, LCOM4, Duplikation, Zyklen), Zoom per Klick |
 | Abhängigkeiten | Dependency Structure Matrix auf Verzeichnis- oder Projektebene mit Drill-down; Graph um eine Datei oder einen Zyklus |
 | Change-Kopplung | Netzwerk und filterbare Liste gemeinsam geänderter Dateipaare, versteckte Paare hervorgehoben |
@@ -117,6 +117,12 @@ keine Abhängigkeit beim Laden.
 Jede Datei hat eine Detailansicht mit Funktionen, Klassen und LCOM4-Gruppen, Imports in beide Richtungen,
 gemeinsam geänderten Dateien, Duplikaten und Autoren. Ansichten und Filter stehen in der URL (`#deps?mode=graph&focus=…`)
 und lassen sich teilen. Hell- und Dunkelmodus folgen dem System oder werden über den Schalter oben rechts gewählt.
+
+Zu jeder bewerteten Note öffnet der Button **KI-Prompt** in der Detailkarte einen Arbeitsauftrag für einen KI-Agenten
+(z. B. Claude Code): eine kurze Anweisung, was zu tun ist, gefolgt von den Fundstellen mit Datei und Zeilenbereich,
+wichtigste zuerst. Wie viele Fundstellen der Auftrag enthält, ist einstellbar (Default 3, höchstens die 15 größten
+Beiträge) und wird im Browser gemerkt. Aufgenommen werden nur echte Befunde, also z. B. nur Funktionen über der
+Komplexitätsschwelle.
 
 ## Bekannte Grenzen
 

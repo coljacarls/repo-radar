@@ -352,7 +352,7 @@
       }
     });
     document.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Escape' && RR.parseHash().params.file) RR.setParams({ file: null }, false);
+      if (ev.key === 'Escape' && !document.querySelector('dialog[open]') && RR.parseHash().params.file) RR.setParams({ file: null }, false);
     });
     let resizeTimer;
     window.addEventListener('resize', () => {

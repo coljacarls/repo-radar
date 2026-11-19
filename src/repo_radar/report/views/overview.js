@@ -28,7 +28,7 @@
         .join(' · ')} · sonst E</p>`;
     }
     return `<div class="card grade-detail">
-      <h3>${esc(g.label)}: ${g.grade ? 'Note ' + g.grade : 'nicht bewertet'}</h3>
+      <div class="section-title"><h3>${esc(g.label)}: ${g.grade ? 'Note ' + g.grade : 'nicht bewertet'}</h3>${RR.promptButton(g)}</div>
       <p>${esc(g.explanation)}</p>
       ${g.details && g.details.length ? `<dl class="kv">${g.details.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
       ${thresholds}
@@ -176,7 +176,10 @@
           return;
         }
         btn.setAttribute('aria-expanded', 'true');
-        detail.innerHTML = gradeDetail(D.grades.find((g) => g.key === btn.dataset.grade));
+        const g = D.grades.find((x) => x.key === btn.dataset.grade);
+        detail.innerHTML = gradeDetail(g);
+        const promptBtn = detail.querySelector('[data-prompt]');
+        if (promptBtn) promptBtn.addEventListener('click', () => RR.openPrompt(g));
       }),
     );
 

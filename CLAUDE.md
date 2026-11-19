@@ -14,9 +14,11 @@ Propagation Cost; Datei-, Verzeichnis-, Projektebene) → `git_history` (Churn, 
 - **Neue Sprache mit Import-Auflösung:** Extraktor in `langs/<sprache>.py` (`extract(root) -> Parsed`), Resolver in
   `deps/<sprache>.py`, Eintrag in `inventory.DEP_FAMILY`, `parsing._GRAMMAR`/`_EXTRACT` und `deps.build_graph`.
 - **Neue Note:** in `scoring.compute` anhängen, Defaults in `config.DEFAULTS["grades"]`. Jede Note liefert Wert,
-  Erklärung, Quelle der Schwellwerte und Top-Befunde, der Report rendert das generisch.
+  Erklärung, Quelle der Schwellwerte und Top-Befunde, der Report rendert das generisch. Für den KI-Prompt einen Eintrag
+  in `report/prompt.js` (`SPECS`) ergänzen: Anweisung, Filter auf echte Befunde, Format einer Fundstelle. Felder, die
+  der Prompt braucht (Zeilenbereich, Partnerdatei …), gehören in die Top-Befunde; ohne Eintrag gibt es keinen Button.
 - **Neue Report-Ansicht:** `report/views/<name>.js` mit `RR.register(id, titel, render)`, in `report/build.SCRIPTS`
-  eintragen (Reihenfolge: `app.js` zuerst, `detail.js` zuletzt, weil es `RR.start()` aufruft).
+  eintragen (Reihenfolge: `app.js` zuerst, dann `prompt.js`, `detail.js` zuletzt, weil es `RR.start()` aufruft).
 
 ## Konventionen
 

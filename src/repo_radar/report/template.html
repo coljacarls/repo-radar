@@ -21,6 +21,16 @@
 <main id="view" tabindex="-1"></main>
 <aside id="drawer" class="drawer" aria-hidden="true" aria-label="Dateidetails"></aside>
 <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+<dialog id="prompt-dialog" class="prompt-dialog" aria-labelledby="prompt-title">
+  <div class="row"><h2 id="prompt-title">KI-Prompt</h2><button class="btn ghost" id="prompt-close" type="button" aria-label="Schließen">✕</button></div>
+  <p class="small secondary">Arbeitsauftrag für einen KI-Agenten, z. B. Claude Code. Die Fundstellen sind nach Wichtigkeit sortiert.</p>
+  <div class="toolbar">
+    <label for="prompt-count">Fundstellen</label>
+    <input type="number" id="prompt-count" min="1" step="1" value="3" autofocus><span class="muted small" id="prompt-total"></span>
+  </div>
+  <textarea id="prompt-text" readonly spellcheck="false" rows="16" aria-label="Prompt"></textarea>
+  <div class="row actions"><span class="muted small" id="prompt-status" role="status"></span><button class="btn primary" id="prompt-copy" type="button">Kopieren</button></div>
+</dialog>
 <script type="application/json" id="rr-data">__DATA__</script>
 <script>/*__JS__*/</script>
 </body>

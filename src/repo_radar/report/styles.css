@@ -221,6 +221,22 @@ table.data tbody tr:hover { background: var(--surface-2); }
 .grade-card .label { font-weight: 600; }
 .grade-card .value { color: var(--text-secondary); font-size: 12.5px; margin-top: 2px; }
 .grade-detail { margin-top: 12px; }
+.grade-detail .section-title h3 { margin: 0; }
+.prompt-dialog {
+  width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 18px 20px;
+  background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.prompt-dialog::backdrop { background: rgb(0 0 0 / 0.45); }
+.prompt-dialog .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.prompt-dialog h2 { margin: 0; font-size: 17px; }
+.prompt-dialog .toolbar { margin: 4px 0 10px; }
+.prompt-dialog input[type="number"] { width: 72px; }
+.prompt-dialog textarea {
+  display: block; box-sizing: border-box; width: 100%; resize: vertical; min-height: 220px;
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.5; color: var(--text-primary);
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px;
+}
+.prompt-dialog .actions { margin-top: 12px; }
 .grade-detail .src { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
 .kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; font-size: 13px; }
 .kv dt { color: var(--text-secondary); }
