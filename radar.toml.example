@@ -1,0 +1,41 @@
+# repo-radar Konfiguration. Als `radar.toml` ins Arbeitsverzeichnis legen oder per `--config` übergeben.
+# Alle Werte sind optional; nicht gesetzte Werte nehmen den Default aus src/repo_radar/config.py.
+
+[analysis]
+# zusätzliche Excludes (Globs, `**` erlaubt). Defaults: node_modules, dist, build, *.min.js, *.d.ts, migrations …
+exclude = ["**/sample/**", "**/examples/**"]
+# zusätzlich als Testcode werten: zählt nicht in Noten, Hotspots und Graph-Metriken
+test_globs = ["integration/**"]
+max_file_bytes = 1_000_000
+duplication = true          # jscpd per npx; braucht Node.js
+min_dup_tokens = 50
+
+[history]
+since = "12 months"         # '6m', '2y', '2025-01-01', 'all'
+max_files_per_commit = 50   # größere Commits (Formatierung, Massen-Umbenennung) zählen nicht für Change-Kopplung
+min_shared_commits = 5
+min_degree = 0.3            # ab diesem Kopplungsgrad wird ein Paar gelistet
+hidden_min_degree = 0.5     # ab diesem Grad zählt ein Paar ohne Import für die Note "Versteckte Kopplung"
+
+# Notengrenzen. ladder = Obergrenzen für A, B, C, D (sonst E).
+[grades.duplication]
+ladder = [3, 5, 10, 20]     # % duplizierte Zeilen (SIG)
+
+[grades.coupling]
+ladder = [10, 20, 30, 45]   # Propagation Cost in %
+
+[grades.cycles]
+ladder = [0, 3, 8, 15]      # % der Dateien in Import-Zyklen
+
+[grades.cohesion]
+ladder = [10, 20, 35, 50]   # % der Klassen mit LCOM4 > 1
+
+[grades.change_coupling]
+ladder = [2, 5, 10, 20]     # % der Dateien mit versteckter Kopplung
+min_commits = 20
+
+# Risikoprofile (SIG): risk = Grenzen moderat/hoch/sehr hoch je Funktion,
+# profile = max. NLOC-Anteil in % je Kategorie für die Note.
+[grades.complexity]
+risk = [10, 20, 50]
+profile = { A = [25, 0, 0], B = [30, 5, 0], C = [40, 10, 0], D = [50, 15, 5] }

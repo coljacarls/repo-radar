@@ -1,0 +1,29 @@
+[project]
+name = "repo-radar"
+version = "0.1.0"
+description = "Codequalität und Kopplung beliebiger Git-Repos analysieren, mit interaktivem HTML-Report"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Colja Carls" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "lizard>=1.26.1",
+    "networkx>=3.7",
+    "tree-sitter-language-pack>=1.25.2",
+    "typer>=0.29.2",
+]
+
+[project.scripts]
+repo-radar = "repo_radar.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.13.0,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
