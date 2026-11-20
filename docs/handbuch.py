@@ -162,6 +162,7 @@ raw(
         repo-radar analyze ~/projects/my-app/libs          # nur ein Teilbaum
         repo-radar analyze https://github.com/org/repo     # wird nach ~/.cache/repo-radar geklont
         repo-radar analyze . --since 6m -x 'sample/**' -t 'integration/**'
+        repo-radar task radar-out/my-app complexity -n 5   # Arbeitsauftrag mit Checkliste (Markdown)
         """,
         "bash",
     )
@@ -181,7 +182,7 @@ raw(
 )
 p(
     "Ergebnis sind zwei Dateien in <code>radar-out/&lt;name&gt;/</code>: <code>report.html</code>, eine einzelne Datei, "
-    "die offline läuft, und <code>analysis.json</code> mit allen Rohdaten."
+    "die offline läuft, und <code>analysis.json</code> mit allen Rohdaten. Für KI-Agenten: <code>skills/repo-radar/SKILL.md</code>."
 )
 
 h2("Ablauf der Analyse")

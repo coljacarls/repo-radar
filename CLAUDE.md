@@ -15,8 +15,8 @@ Propagation Cost; Datei-, Verzeichnis-, Projektebene) → `git_history` (Churn, 
   `deps/<sprache>.py`, Eintrag in `inventory.DEP_FAMILY`, `parsing._GRAMMAR`/`_EXTRACT` und `deps.build_graph`.
 - **Neue Note:** in `scoring.compute` anhängen, Defaults in `config.DEFAULTS["grades"]`. Jede Note liefert Wert,
   Erklärung, Quelle der Schwellwerte und Top-Befunde, der Report rendert das generisch. Für den KI-Prompt einen Eintrag
-  in `report/prompt.js` (`SPECS`) ergänzen: Anweisung, Filter auf echte Befunde, Format einer Fundstelle. Felder, die
-  der Prompt braucht (Zeilenbereich, Partnerdatei …), gehören in die Top-Befunde; ohne Eintrag gibt es keinen Button.
+  in `prompts.SPECS` ergänzen: Anweisung, Filter auf echte Befunde, Format einer Fundstelle. Felder, die der Prompt
+  braucht (Zeilenbereich, Partnerdatei …), gehören in die Top-Befunde; ohne Eintrag gibt es weder Button noch `task`.
 - **Neue Report-Ansicht:** `report/views/<name>.js` mit `RR.register(id, titel, render)`, in `report/build.SCRIPTS`
   eintragen (Reihenfolge: `app.js` zuerst, dann `prompt.js`, `detail.js` zuletzt, weil es `RR.start()` aufruft).
 
@@ -31,3 +31,11 @@ Propagation Cost; Datei-, Verzeichnis-, Projektebene) → `git_history` (Churn, 
 - Nach Änderungen: `uv run pytest`, dann einen Report bauen und im Browser ansehen (Headless-Screenshot:
   `google-chrome --headless=new --screenshot=x.png --window-size=1440,1100 --virtual-time-budget=4000 <url>`;
   `file://` funktioniert dafür nicht zuverlässig, Ausgabeordner per `python3 -m http.server` servieren).
+- KI-Prompts: Texte nur in `prompts.py` (Single Source of Truth). Die Pipeline hängt sie als `grades[].prompt` ins JSON,
+  `report/prompt.js` setzt sie im Dialog zusammen, `repo-radar task` schreibt daraus das Markdown mit Checkliste.
+- CLI-Vertrag für Agenten: Ergebnisse (Notentabelle, Pfade) auf stdout, Fortschritt und Fehler auf stderr; Exit 2 bei
+  Bedienfehlern, 1 wenn es nichts zu tun gibt. Der Skill `skills/repo-radar/SKILL.md` baut darauf auf: Wer Ausgabe,
+  Befehle oder Optionen ändert, passt ihn mit an.
+- Handbuch: `docs/handbuch.py` erzeugt `docs/repo-radar-handbuch.pdf` (nicht im Git). Codeausschnitte kommen live aus
+  `src/`, die Erklärtexte nicht: Bei Änderungen an Metriken die Texte prüfen. Bei jedem Release neu bauen und anhängen:
+  `gh release create vX.Y.Z docs/repo-radar-handbuch.pdf` (Version vorher in `pyproject.toml` und `__init__.py`).

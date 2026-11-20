@@ -21,6 +21,10 @@ Technisch ist repo-radar ein Python-CLI. Es führt keinen Code des analysierten 
 schreibt den Report als **eine einzelne HTML-Datei**, die offline läuft und sich weitergeben lässt. Daneben entsteht
 `analysis.json` mit allen Rohdaten (stabiles Schema, z. B. für Auswertungen mit Claude).
 
+Wie jede Kennzahl berechnet wird, mit Codeausschnitten und Rechenbeispielen, erklärt das
+[Handbuch der Kennzahlen (PDF)](https://github.com/coljacarls/repo-radar/releases/latest/download/repo-radar-handbuch.pdf).
+Es hängt an jedem Release und entsteht mit `uv run python docs/handbuch.py` aus dem aktuellen Code.
+
 Unterstützt werden alle Sprachen, die [lizard](https://github.com/terryyin/lizard) kennt (u. a. TypeScript,
 JavaScript, Java, Python, Kotlin, Go, C#, Rust). Den Abhängigkeitsgraphen mit echter Import-Auflösung gibt es für
 **TypeScript/JavaScript (inkl. Angular und Nx), Java und Python**.
@@ -30,8 +34,8 @@ JavaScript, Java, Python, Kotlin, Go, C#, Rust). Den Abhängigkeitsgraphen mit e
 Voraussetzungen: Python ≥ 3.12, [uv](https://docs.astral.sh/uv/), git. Optional Node.js (für die Duplikationsanalyse).
 
 ```bash
-cd repo-radar
-uv tool install .        # danach ist `repo-radar` global verfügbar
+uv tool install git+https://github.com/coljacarls/repo-radar   # danach ist `repo-radar` global verfügbar
+uv tool install -e ~/projects/repo-radar                       # oder: aus einem lokalen Klon, Änderungen wirken sofort
 ```
 
 Ohne Installation: `uv run repo-radar …` im Projektordner.
@@ -45,7 +49,18 @@ repo-radar analyze https://github.com/spring-projects/spring-petclinic
 repo-radar analyze . --since 6m -x 'sample/**' -t 'integration/**'
 ```
 
-Ausgabe: `radar-out/<name>/report.html` und `radar-out/<name>/analysis.json`.
+Ausgabe: `radar-out/<name>/report.html` und `radar-out/<name>/analysis.json`. Auf stdout erscheint danach die
+Notentabelle (Markdown) mit den Pfaden; Fortschrittsmeldungen gehen nach stderr und entfallen mit `-q`.
+
+```bash
+repo-radar grades radar-out/my-app                    # Notentabelle einer vorhandenen Analyse, ohne neu zu analysieren
+repo-radar task radar-out/my-app complexity -n 5      # Arbeitsauftrag mit Checkliste: radar-out/my-app/auftrag-complexity.md
+```
+
+`task` nimmt den Schlüssel aus der Tabelle (`complexity`, `unit_size`, `duplication`, `coupling`, `cycles`,
+`cohesion`, `change_coupling`, `knowledge`) und schreibt die `-n` wichtigsten Fundstellen als Markdown: Auftrag für
+einen KI-Agenten, Hintergrund der Metrik und eine Checkliste zum Abhaken. Eine vorhandene Datei wird nur mit `--force`
+überschrieben, weil sie Fortschritt enthalten kann.
 
 | Option | Bedeutung |
 | --- | --- |
@@ -57,6 +72,7 @@ Ausgabe: `radar-out/<name>/report.html` und `radar-out/<name>/analysis.json`.
 | `-c, --config FILE` | Konfiguration; eine `radar.toml` im Arbeitsverzeichnis wird automatisch gelesen |
 | `-o, --out DIR` | Ausgabeordner |
 | `--workers N` | parallele Prozesse fürs Parsen |
+| `-q, --quiet` | keine Fortschrittsmeldungen, nur das Ergebnis |
 
 URLs werden nach `~/.cache/repo-radar/repos/` geklont und bei erneutem Aufruf aktualisiert.
 
@@ -123,6 +139,48 @@ Zu jeder bewerteten Note öffnet der Button **KI-Prompt** in der Detailkarte ein
 wichtigste zuerst. Wie viele Fundstellen der Auftrag enthält, ist einstellbar (Default 3, höchstens die 15 größten
 Beiträge) und wird im Browser gemerkt. Aufgenommen werden nur echte Befunde, also z. B. nur Funktionen über der
 Komplexitätsschwelle.
+
+## Mit KI-Agenten (Claude Code, Gemini CLI)
+
+Der Skill [`skills/repo-radar/SKILL.md`](skills/repo-radar/SKILL.md) führt einen Agenten durch den Ablauf: Repo
+analysieren, Noten berichten, im Interview Kategorie und Anzahl der Fundstellen erfragen, mit `repo-radar task` den
+Auftrag erzeugen und die Checkliste abarbeiten. Das Format (`SKILL.md` mit Frontmatter) verstehen Claude Code und
+Gemini CLI gleichermaßen.
+
+**1. Tool auf den PATH** (siehe [Installation](#installation)). Der Skill ruft nur `repo-radar` auf; ein absoluter
+Pfad in `CLAUDE.md`, `GEMINI.md` oder `AGENTS.md` ist damit überflüssig.
+
+**2. Skill verlinken**, einmal pro Rechner. Der Symlink zeigt auf den Klon, der Skill bleibt so mit dem Tool im
+selben Versionsstand:
+
+```bash
+mkdir -p ~/.claude/skills ~/.agents/skills
+ln -s ~/projects/repo-radar/skills/repo-radar ~/.claude/skills/repo-radar   # Claude Code
+ln -s ~/projects/repo-radar/skills/repo-radar ~/.agents/skills/repo-radar   # Gemini CLI und andere Agenten mit Agent Skills
+```
+
+**3. Berechtigung.** In Claude Code gibt der Skill den Aufruf selbst frei (`allowed-tools: Bash(repo-radar:*)`),
+solange er aktiv ist. Wer `repo-radar` auch außerhalb des Skills ohne Rückfrage erlauben will, trägt das in
+`~/.claude/settings.json` ein:
+
+```json
+{ "permissions": { "allow": ["Bash(repo-radar:*)"] } }
+```
+
+In Gemini CLI regelt das die [Policy Engine](https://geminicli.com/docs/reference/policy-engine/), z. B. mit einer
+Datei `~/.gemini/policies/repo-radar.toml` (Ort und Felder je nach Version, siehe Doku):
+
+```toml
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = "repo-radar "
+decision = "allow"
+priority = 100
+```
+
+Freigeben lässt sich `repo-radar` guten Gewissens: Es liest das Repo, schreibt nur in den Ausgabeordner und in
+`~/.cache/repo-radar/`, führt keinen Code des Repos aus und lädt höchstens `jscpd` über `npx` (abschaltbar mit
+`--no-dup`). Für Git-URLs klont es nach `~/.cache/repo-radar/repos/`.
 
 ## Bekannte Grenzen
 

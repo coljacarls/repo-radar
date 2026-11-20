@@ -10,13 +10,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable
 
-from . import __version__, duplication, git_history, graph_metrics, scoring
+from . import __version__, duplication, git_history, graph_metrics, prompts, scoring
 from .deps import build_graph
 from .inventory import build_inventory
 from .parsing import analyze_all
 from .source import RepoSource, list_tracked_files
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2  # 2: grades[].prompt
 
 
 def _log_norm(values: dict[str, float]) -> dict[str, float]:
@@ -164,7 +164,7 @@ def run(src: RepoSource, cfg: dict, log: Callable[[str], None] = print, workers:
     def level(lm: graph_metrics.LevelMetrics) -> dict:
         return {"groups": lm.groups, "edges": lm.edges, "cycles": lm.cycles}
 
-    return {
+    data = {
         "schema": SCHEMA_VERSION,
         "meta": {
             "name": src.name,
@@ -206,3 +206,5 @@ def run(src: RepoSource, cfg: dict, log: Callable[[str], None] = print, workers:
         "clones": [{**c, "a": index[c["a"]], "b": index[c["b"]]} for c in dup.clones],
         "externals": ext_counter.most_common(60),
     }
+    prompts.attach(data)  # braucht Dateien, Kanten und Zyklen im JSON-Format
+    return data
