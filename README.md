@@ -31,14 +31,64 @@ JavaScript, Java, Python, Kotlin, Go, C#, Rust). Den Abhängigkeitsgraphen mit e
 
 ## Installation
 
-Voraussetzungen: Python ≥ 3.12, [uv](https://docs.astral.sh/uv/), git. Optional Node.js (für die Duplikationsanalyse).
+Voraussetzungen: [uv](https://docs.astral.sh/uv/) und git; Python ≥ 3.12 lädt uv bei Bedarf selbst. Optional Node.js (für die Duplikationsanalyse).
+
+### Global verfügbar machen (Linux)
+
+uv installiert `repo-radar` in eine eigene, isolierte Umgebung und legt den Befehl nach `~/.local/bin`. Kein `sudo`, kein
+Eingriff in das System-Python.
 
 ```bash
-uv tool install git+https://github.com/coljacarls/repo-radar   # danach ist `repo-radar` global verfügbar
-uv tool install -e ~/projects/repo-radar                       # oder: aus einem lokalen Klon, Änderungen wirken sofort
+# 1. uv installieren, falls noch nicht vorhanden
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 2. repo-radar installieren: direkt von GitHub …
+uv tool install git+https://github.com/coljacarls/repo-radar
+#    … oder aus einem lokalen Klon (editierbar: Änderungen am Code wirken sofort)
+uv tool install -e ~/projects/repo-radar
+
+# 3. ~/.local/bin in den PATH aufnehmen (nur nötig, wenn `repo-radar` danach nicht gefunden wird),
+#    dann ein neues Terminal öffnen
+uv tool update-shell
+
+# 4. prüfen
+repo-radar version
 ```
 
+Aktualisieren mit `uv tool upgrade repo-radar` (bei der editierbaren Installation reicht `git pull` im Klon, nach geänderten Abhängigkeiten
+erneut `uv tool install -e …`),
+entfernen mit `uv tool uninstall repo-radar`.
+
 Ohne Installation: `uv run repo-radar …` im Projektordner.
+
+### Skill für Claude Code und Gemini CLI einbinden (Linux)
+
+Damit ein Agent repo-radar selbstständig nutzt (Ablauf siehe [Mit KI-Agenten](#mit-ki-agenten-claude-code-gemini-cli)),
+bekommt er den Skill aus `skills/repo-radar/` per Symlink. Der Link zeigt in einen lokalen Klon; ein `git pull` dort
+hält Skill und Tool auf demselben Stand.
+
+```bash
+# 1. lokaler Klon (entfällt, wenn schon vorhanden); den Pfad merkt sich der Symlink
+git clone https://github.com/coljacarls/repo-radar ~/projects/repo-radar
+REPO=~/projects/repo-radar
+
+# 2. Claude Code: persönliche Skills liegen in ~/.claude/skills
+mkdir -p ~/.claude/skills
+ln -sfn "$REPO/skills/repo-radar" ~/.claude/skills/repo-radar
+
+# 3. Gemini CLI: persönliche Skills liegen in ~/.gemini/skills
+mkdir -p ~/.gemini/skills
+ln -sfn "$REPO/skills/repo-radar" ~/.gemini/skills/repo-radar
+
+# 4. prüfen: beide Links zeigen auf den Ordner mit SKILL.md
+ls -l ~/.claude/skills/repo-radar ~/.gemini/skills/repo-radar
+```
+
+Die Agenten lesen Skills beim Start: In einer neuen Session erscheint der Skill in Claude Code als `/repo-radar`, in
+Gemini CLI in der Liste von `/skills`. Andere Agenten mit Agent-Skills-Unterstützung (z. B. Codex) suchen in
+`~/.agents/skills`; dort genügt derselbe Link. Gemini CLI liest diesen Ordner ebenfalls, daher dort nur einen der beiden
+Links anlegen, sonst kennt Gemini den Skill doppelt. Entfernen: den Link löschen (`rm ~/.claude/skills/repo-radar`),
+der Klon bleibt unberührt.
 
 ## Benutzung
 
@@ -150,14 +200,8 @@ Gemini CLI gleichermaßen.
 **1. Tool auf den PATH** (siehe [Installation](#installation)). Der Skill ruft nur `repo-radar` auf; ein absoluter
 Pfad in `CLAUDE.md`, `GEMINI.md` oder `AGENTS.md` ist damit überflüssig.
 
-**2. Skill verlinken**, einmal pro Rechner. Der Symlink zeigt auf den Klon, der Skill bleibt so mit dem Tool im
-selben Versionsstand:
-
-```bash
-mkdir -p ~/.claude/skills ~/.agents/skills
-ln -s ~/projects/repo-radar/skills/repo-radar ~/.claude/skills/repo-radar   # Claude Code
-ln -s ~/projects/repo-radar/skills/repo-radar ~/.agents/skills/repo-radar   # Gemini CLI und andere Agenten mit Agent Skills
-```
+**2. Skill verlinken**, einmal pro Rechner, siehe
+[Skill für Claude Code und Gemini CLI einbinden](#skill-für-claude-code-und-gemini-cli-einbinden-linux).
 
 **3. Berechtigung.** In Claude Code gibt der Skill den Aufruf selbst frei (`allowed-tools: Bash(repo-radar:*)`),
 solange er aktiv ist. Wer `repo-radar` auch außerhalb des Skills ohne Rückfrage erlauben will, trägt das in
