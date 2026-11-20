@@ -1,6 +1,6 @@
 [project]
 name = "repo-radar"
-version = "0.1.0"
+version = "0.2.0"
 description = "Codequalität und Kopplung beliebiger Git-Repos analysieren, mit interaktivem HTML-Report"
 readme = "README.md"
 license = "MIT"

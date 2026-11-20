@@ -3,3 +3,5 @@ __pycache__/
 .pytest_cache/
 radar-out/
 radar.toml
+docs/*.pdf
+docs/*.html
